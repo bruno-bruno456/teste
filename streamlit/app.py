@@ -60,25 +60,21 @@ def preprocess_user_message(message):
 
 def get_boto3_client(service_name, region_name='us-east-1', profile_name=''):
     """
-    Retorna um cliente do serviço AWS especificado.
- 
-    Na EC2, usará automaticamente o perfil de instância.
+    Retorna um cliente do serviço AWS usando IAM Role da instância.
     """
     try:
-    # Se um perfil for fornecido, tenta usá-lo
-        if profile_name:
-            session = boto3.Session(profile_name=profile_name, region_name=region_name)
-            client = session.client(service_name)
-            return client
-        else:
-            # Caso contrário, usa as credenciais da instância EC2
-            session = boto3.Session(region_name=region_name)
-            client = session.client(service_name)
-            return client
+        # Primeiro tenta usar o IAM Role (modo de produção)
+        session = boto3.Session(region_name=region_name)
+        client = session.client(service_name)
+        
+        print(f"DEBUG: Usando IAM Role para acessar '{service_name}' na região '{region_name}'")
+        return client
+        
     except Exception as e:
-        print(f"ERRO: Falha ao criar cliente boto3: {str(e)}")
+        print(f"ERRO: Não foi possível acessar a AWS: {str(e)}")
+        print("ATENÇÃO: Verifique se o IAM Role está corretamente associado à instância EC2.")
         return None
-
+    
 def query_bedrock(message, session_id="", model_params=None, context="", conversation_history=None):
     """
     Envia uma mensagem para o Amazon Bedrock com parâmetros de modelo específicos.
