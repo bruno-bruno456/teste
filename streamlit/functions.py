@@ -98,10 +98,10 @@ def invoke_bedrock_model(prompt, inference_profile_arn, model_params=None):
     """
     if model_params is None:
         model_params = {
-        "temperature": 1.0,
-        "top_p": 0.95,
-        "top_k": 200,
-        "max_tokens": 800
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "top_k": 250,
+        "max_tokens": 1000
         }
 
     bedrock_runtime = get_boto3_client('bedrock-runtime')

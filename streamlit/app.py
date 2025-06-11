@@ -13,7 +13,7 @@ from functions import (
     generate_chat_prompt, format_context, 
     read_pdf_from_uploaded_file, read_txt_from_uploaded_file, read_csv_from_uploaded_file
 )
-PROFILE_NAME = os.environ.get("AWS_PROFILE", "edn174")
+PROFILE_NAME = os.environ.get("AWS_PROFILE", "")
 
 INFERENCE_PROFILE_ARN = "arn:aws:bedrock:us-east-1:851614451056:inference-profile/us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
@@ -44,7 +44,7 @@ def add_javascript():
 
 #alterar
 st.set_page_config(
-   page_title="NOME DA PÁGINA",
+   page_title="Aplicação",
    page_icon="logo.jpeg",
    layout="wide",
    initial_sidebar_state="expanded"
@@ -58,33 +58,26 @@ def preprocess_user_message(message):
     """
     return message
 
-def get_boto3_client(service_name, region_name='us-east-1', profile_name='edn174'):
+def get_boto3_client(service_name, region_name='us-east-1', profile_name=''):
     """
     Retorna um cliente do serviço AWS especificado.
-    
-    Tenta usar o perfil especificado para desenvolvimento local primeiro.
-    Se falhar, assume que está em uma instância EC2 e usa as credenciais do IAM role.
+ 
+    Na EC2, usará automaticamente o perfil de instância.
     """
     try:
-        session = boto3.Session(profile_name=profile_name, region_name=region_name)
-        client = session.client(service_name)
-        if service_name == 'sts':
-            caller_identity = client.get_caller_identity()
-            print(f"DEBUG: Caller Identity: {caller_identity}")
-        print(f"DEBUG: Using profile '{profile_name}' in region '{region_name}' for service '{service_name}'")
-        return client
-    except Exception as e:
-        print(f"INFO: Não foi possível usar o perfil local '{profile_name}', tentando credenciais do IAM role: {str(e)}")
-        try:
+    # Se um perfil for fornecido, tenta usá-lo
+        if profile_name:
+            session = boto3.Session(profile_name=profile_name, region_name=region_name)
+            client = session.client(service_name)
+            return client
+        else:
+            # Caso contrário, usa as credenciais da instância EC2
             session = boto3.Session(region_name=region_name)
             client = session.client(service_name)
-            caller_identity = client.get_caller_identity()
-            print(f"DEBUG: Caller Identity (IAM Role): {caller_identity}")
-            print(f"DEBUG: Using IAM role in region '{region_name}' for service '{service_name}'")
             return client
-        except Exception as e:
-            print(f"ERRO: Falha ao criar cliente boto3: {str(e)}")
-            return None
+    except Exception as e:
+        print(f"ERRO: Falha ao criar cliente boto3: {str(e)}")
+        return None
 
 def query_bedrock(message, session_id="", model_params=None, context="", conversation_history=None):
     """
@@ -93,10 +86,10 @@ def query_bedrock(message, session_id="", model_params=None, context="", convers
     #ALTERAR
     if model_params is None:
         model_params = {
-            "temperature": 1.0,
-            "top_p": 0.85,
-            "top_k": 200,
-            "max_tokens": 800,
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "top_k": 250,
+            "max_tokens": 1000,
             "response_format": {"type": "text"}
         }
     
@@ -926,7 +919,7 @@ if check_password():
         use_rag = st.checkbox("Usar Contexto Adicional (RAG)", value=st.session_state.use_rag)
         st.session_state.use_rag = use_rag
 
-        if use_rag:
+        """if use_rag:
             rag_source = st.radio(
                 "Fonte do Contexto",
                 ("Arquivo", "Texto Direto"),
@@ -952,10 +945,10 @@ if check_password():
                     key="direct_text"
                 )
             st.divider()
-
+        
             if st.button("Logout", use_container_width=True):
                 logout()
-
+"""
     main_col1, main_col2, main_col3 = st.columns([1, 10, 1])
     
     with main_col2:
@@ -990,10 +983,10 @@ if check_password():
             st.text_area("Mensagem", placeholder="Digite sua mensagem aqui...", key="user_input", 
                 height=70, label_visibility="collapsed")
 
-        with col2:
+        """with col2:
             file_to_send = st.file_uploader("Anexar arquivo", type=["pdf", "txt", "csv", "doc", "docx", "xls", "xlsx"], 
                                         key="file_to_send", label_visibility="collapsed")
-            st.markdown('<div class="attach-icon" title="Anexar arquivo"><i class="fas fa-paperclip"></i></div>', unsafe_allow_html=True)
+            st.markdown('<div class="attach-icon" title="Anexar arquivo"><i class="fas fa-paperclip"></i></div>', unsafe_allow_html=True)"""
 
         with col3:
             if st.button("Enviar", key="send_button", use_container_width=True):
