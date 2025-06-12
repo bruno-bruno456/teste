@@ -915,7 +915,7 @@ if check_password():
         use_rag = st.checkbox("Usar Contexto Adicional (RAG)", value=st.session_state.use_rag)
         st.session_state.use_rag = use_rag
 
-        """if use_rag:
+        if use_rag:
             rag_source = st.radio(
                 "Fonte do Contexto",
                 ("Arquivo", "Texto Direto"),
@@ -944,7 +944,7 @@ if check_password():
         
             if st.button("Logout", use_container_width=True):
                 logout()
-"""
+
     main_col1, main_col2, main_col3 = st.columns([1, 10, 1])
     
     with main_col2:
@@ -979,10 +979,10 @@ if check_password():
             st.text_area("Mensagem", placeholder="Digite sua mensagem aqui...", key="user_input", 
                 height=70, label_visibility="collapsed")
 
-        """with col2:
-            file_to_send = st.file_uploader("Anexar arquivo", type=["pdf", "txt", "csv", "doc", "docx", "xls", "xlsx"], 
-                                        key="file_to_send", label_visibility="collapsed")
-            st.markdown('<div class="attach-icon" title="Anexar arquivo"><i class="fas fa-paperclip"></i></div>', unsafe_allow_html=True)"""
+        #with col2:
+        #    file_to_send = st.file_uploader("Anexar arquivo", type=["pdf", "txt", "csv", "doc", "docx", "xls", "xlsx"], 
+        #                                key="file_to_send", label_visibility="collapsed")
+        #    st.markdown('<div class="attach-icon" title="Anexar arquivo"><i class="fas fa-paperclip"></i></div>', unsafe_allow_html=True)
 
         with col3:
             if st.button("Enviar", key="send_button", use_container_width=True):
